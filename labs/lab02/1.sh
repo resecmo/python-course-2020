@@ -1,4 +1,5 @@
-while True
+#!/usr/bin/bash
+while true
 do
   f=$(find ./custom_tmp -maxdepth 1 -type f | wc -l)
   d=$(find ./custom_tmp -maxdepth 1 -type d | wc -l)
