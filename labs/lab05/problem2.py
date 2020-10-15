@@ -8,28 +8,28 @@ class Rational:
         elif denominator < 0:
             numerator = -numerator
             denominator = -denominator
-        self.numerator = numerator
-        self.denominator = denominator
+        self.__numerator = numerator
+        self.__denominator = denominator
         self.reduce()
 
     def reduce(self):
-        factor = gcd(self.numerator, self.denominator)
-        self.numerator //= factor
-        self.denominator //= factor
+        factor = gcd(self.__numerator, self.__denominator)
+        self.__numerator //= factor
+        self.__denominator //= factor
 
     def __float__(self):
-        return self.numerator / self.denominator
+        return self.__numerator / self.__denominator
 
     def __neg__(self):
-        return Rational(-self.numerator, self.denominator)
+        return Rational(-self.__numerator, self.__denominator)
 
     def __add__(self, other):
         if isinstance(other, Rational):
-            return_value = Rational(self.numerator * other.denominator + other.numerator * self.denominator,
-                                    self.denominator * other.denominator)
+            return_value = Rational(self.__numerator * other.__denominator + other.__numerator * self.__denominator,
+                                    self.__denominator * other.__denominator)
             return_value.reduce()
         elif isinstance(other, int):
-            return_value = Rational(self.numerator + other * self.denominator, self.denominator)
+            return_value = Rational(self.__numerator + other * self.__denominator, self.__denominator)
         else:
             raise TypeError(f"Cannot add {type(other)} to Rational")
         return return_value
@@ -55,9 +55,9 @@ class Rational:
 
     def __mul__(self, other):
         if isinstance(other, Rational):
-            return_value = Rational(self.numerator * other.numerator, self.denominator * other.denominator)
+            return_value = Rational(self.__numerator * other.__numerator, self.__denominator * other.__denominator)
         elif isinstance(other, int):
-            return_value = Rational(self.numerator * other, self.denominator)
+            return_value = Rational(self.__numerator * other, self.__denominator)
         else:
             raise TypeError(f"Cannot multiply {type(other)} by Rational")
         return_value.reduce()
@@ -71,9 +71,9 @@ class Rational:
 
     def __truediv__(self, other):
         if isinstance(other, Rational):
-            return_value = Rational(self.numerator * other.denominator, self.denominator * other.numerator)
+            return_value = Rational(self.__numerator * other.__denominator, self.__denominator * other.__numerator)
         elif isinstance(other, int):
-            return_value = Rational(self.numerator, self.denominator * other)
+            return_value = Rational(self.__numerator, self.__denominator * other)
         else:
             raise TypeError(f"Cannot multiply Rational by {type(other)}")
         return_value.reduce()
@@ -81,20 +81,20 @@ class Rational:
 
     def __rtruediv__(self, other):
         if isinstance(other, int):
-            return Rational(self.denominator * other, self.numerator)
+            return Rational(self.__denominator * other, self.__numerator)
         else:
             raise TypeError(f"Cannot divide {type(other)} by Rational")
 
     def __eq__(self, other):
         if isinstance(other, Rational):
-            return self.numerator == other.numerator and self.denominator == other.denominator
+            return self.__numerator == other.__numerator and self.__denominator == other.__denominator
         elif isinstance(other, int):
-            return self.numerator == other and self.denominator == 1
+            return self.__numerator == other and self.__denominator == 1
         else:
             raise TypeError(f"Cannot compare {type(other)} and Rational")
 
     def __str__(self):
-        return f"{self.numerator}/{self.denominator}"
+        return f"{self.__numerator}/{self.__denominator}"
 
     @classmethod
     def from_string(cls, string):
