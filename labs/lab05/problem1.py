@@ -24,7 +24,7 @@ class Library:
     def tell_info(self, book_title):
         for book in self.books:
             if book.title == book_title:
-                return f"Title: {book.title}\nAuthor: {book.author}\nPublication date: {book.publication_date}\nISBN: {book.ISBN}\n"
+                return book.info()
         return f"No such book in {self.name}!\n"
 
     def delete_book(self, book):
@@ -36,16 +36,16 @@ class Library:
             del self.books_by_author[book.author]
 
 
-"""Далее надо найти и удалить все книги Толстого из 
-библиотеки. Проверить, что в библиотеке в самом деле не осталось книг Толстого"""
-
-
 class Book:
     def __init__(self, title, author, publication_date=None, ISBN=None):
         self.title = title
         self.author = author
         self.publication_date = publication_date
         self.ISBN = ISBN
+
+    def info(self):
+        return f"Title: {self.title}\nAuthor: {self.author}\n" +\
+               f"Publication date: {self.publication_date}\nISBN: {self.ISBN}\n"
 
 
 def test_library():
