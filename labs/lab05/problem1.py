@@ -1,13 +1,12 @@
 class Library:
-    def __init__(self, name, books=[]):
+    def __init__(self, name, books=None):
+        if books is None:
+            books = []
         self.name = name
-        self.books = books
+        self.books = []
         self.books_by_author = {}
         for book in books:
-            if book.author in self.books_by_author:
-                self.books_by_author[book.author].append(book)
-            else:
-                self.books_by_author[book.author] = [book]
+            self.add_book(book)
 
     def add_book(self, book):
         self.books.append(book)
@@ -17,19 +16,17 @@ class Library:
             self.books_by_author[book.author] = [book]
 
     def search_by_author(self, author):
-        if author not in self.books_by_author:
-            return None
-        return self.books_by_author[author]
+        return self.books_by_author.get(author, None)
 
     def tell_info(self, book_title):
         for book in self.books:
             if book.title == book_title:
-                return book.info()
-        return f"No such book in {self.name}!\n"
+                return str(book)
+        raise KeyError(f"No such book in {self.name}!\n")
 
     def delete_book(self, book):
         if book not in self.books:
-            raise ValueError(f"No such book in {self.name}!\n")
+            raise KeyError(f"No such book in {self.name}!\n")
         self.books.remove(book)
         self.books_by_author[book.author].remove(book)
         if len(self.books_by_author[book.author]) == 0:
@@ -43,7 +40,7 @@ class Book:
         self.publication_date = publication_date
         self.ISBN = ISBN
 
-    def info(self):
+    def __str__(self):
         return f"Title: {self.title}\nAuthor: {self.author}\n" +\
                f"Publication date: {self.publication_date}\nISBN: {self.ISBN}\n"
 
@@ -63,6 +60,8 @@ def test_library():
         library.delete_book(by_tolstoy[0])
     for book in library.books:
         print(library.tell_info(book.title))
+
+    assert library.search_by_author("L. Tolstoy") is None
 
 
 if __name__ == '__main__':
