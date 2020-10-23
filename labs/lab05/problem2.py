@@ -4,111 +4,100 @@ from math import gcd
 class Rational:
     def __init__(self, numerator=0, denominator=1):
         if denominator == 0:
-            raise ValueError(f"Denominator is zero")
+            raise ValueError(f"denominator is zero")
         elif denominator < 0:
             numerator = -numerator
             denominator = -denominator
-        self.__numerator = numerator
-        self.__denominator = denominator
+        self._numerator = numerator
+        self._denominator = denominator
         self.reduce()
 
     def reduce(self):
-        factor = gcd(self.__numerator, self.__denominator)
-        self.__numerator //= factor
-        self.__denominator //= factor
+        factor = gcd(self._numerator, self._denominator)
+        self._numerator //= factor
+        self._denominator //= factor
 
     def __float__(self):
-        return self.__numerator / self.__denominator
+        return self._numerator / self._denominator
 
     def __neg__(self):
-        return Rational(-self.__numerator, self.__denominator)
+        return Rational(-self._numerator, self._denominator)
 
     def __add__(self, other):
         if isinstance(other, Rational):
-            return_value = Rational(self.__numerator * other.__denominator + other.__numerator * self.__denominator,
-                                    self.__denominator * other.__denominator)
-            return_value.reduce()
+            return_value = Rational(self._numerator * other._denominator + other._numerator * self._denominator,
+                                    self._denominator * other._denominator)
         elif isinstance(other, int):
-            return_value = Rational(self.__numerator + other * self.__denominator, self.__denominator)
+            return_value = Rational(self._numerator + other * self._denominator, self._denominator)
         else:
-            raise TypeError(f"Cannot add {type(other)} to Rational")
+            return NotImplemented
         return return_value
 
     def __radd__(self, other):
-        if isinstance(other, int):
-            return self + other
-        else:
-            raise TypeError(f"Cannot add {type(other)} to Rational")
+        return self + other
 
-    def __sub__(self, other):  # possibly bad for call stack?
+    def __sub__(self, other):
         if isinstance(other, (Rational, int)):
-            return_value = self + (-other)
+            return self + (-other)
         else:
-            raise TypeError(f"Cannot subtract {type(other)} from Rational")
-        return return_value
+            return NotImplemented
 
     def __rsub__(self, other):
         if isinstance(other, int):
             return -(self - other)
         else:
-            raise TypeError(f"Cannot subtract {type(other)} from Rational")
+            return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Rational):
-            return_value = Rational(self.__numerator * other.__numerator, self.__denominator * other.__denominator)
+            return_value = Rational(self._numerator * other._numerator, self._denominator * other._denominator)
         elif isinstance(other, int):
-            return_value = Rational(self.__numerator * other, self.__denominator)
+            return_value = Rational(self._numerator * other, self._denominator)
         else:
-            raise TypeError(f"Cannot multiply {type(other)} by Rational")
+            return NotImplemented
         return_value.reduce()
         return return_value
 
     def __rmul__(self, other):
-        if isinstance(other, int):
-            return self * other
-        else:
-            raise TypeError(f"Cannot multiply {type(other)} by Rational")
+        return self * other
 
     def __truediv__(self, other):
         if isinstance(other, Rational):
-            return_value = Rational(self.__numerator * other.__denominator, self.__denominator * other.__numerator)
+            return_value = Rational(self._numerator * other._denominator, self._denominator * other._numerator)
         elif isinstance(other, int):
-            return_value = Rational(self.__numerator, self.__denominator * other)
+            return_value = Rational(self._numerator, self._denominator * other)
         else:
-            raise TypeError(f"Cannot multiply Rational by {type(other)}")
+            return NotImplemented
         return_value.reduce()
         return return_value
 
     def __rtruediv__(self, other):
         if isinstance(other, int):
-            return Rational(self.__denominator * other, self.__numerator)
+            return Rational(self._denominator * other, self._numerator)
         else:
-            raise TypeError(f"Cannot divide {type(other)} by Rational")
+            return NotImplemented
 
     def __eq__(self, other):
         if isinstance(other, Rational):
-            return self.__numerator == other.__numerator and self.__denominator == other.__denominator
+            return self._numerator == other._numerator and self._denominator == other._denominator
         elif isinstance(other, int):
-            return self.__numerator == other and self.__denominator == 1
+            return self._numerator == other and self._denominator == 1
         else:
-            raise TypeError(f"Cannot compare {type(other)} and Rational")
+            return NotImplemented
 
     def __str__(self):
-        return f"{self.__numerator}/{self.__denominator}"
+        return f"{self._numerator}/{self._denominator}"
 
     @classmethod
     def from_string(cls, string):
-        numbers_list = string.split('/')
-        if not len(numbers_list) == 2:
+        numbers = string.split('/')
+        if not len(numbers) == 2:
             raise ValueError(f"{string} cannot be read as rational")
-        else:
-            try:
-                num, denom = [int(x) for x in numbers_list]
-            except ValueError as e:
-                raise ValueError(f"Numerator or denominator is not integer in \"{string}\"")
-            if denom <= 0:
-                raise ValueError(f"Denominator is nonpositive in \"{string}\"")
-            return Rational(num, denom)
+        num = int(numbers[0])
+        denom = int(numbers[1])
+        if denom <= 0:
+            raise ValueError(f"denominator is nonpositive in \"{string}\"")
+        return Rational(num, denom)
 
 
 def test_operations():
@@ -125,6 +114,7 @@ def test_operations():
     assert Rational(7, 2) * 2 == 7
     assert 5 * Rational(3, 25) == Rational(3, 5)
     assert 5 * Rational(3, 30) == Rational(1, 2)
+    assert -7 * Rational(-5, -14) == Rational(5, -2)
 
     assert Rational(5, 7) / Rational(5, 7) == 1
     assert 6 / Rational(12, 5) == Rational(5, 2)
@@ -134,6 +124,11 @@ def test_operations():
     assert Rational(36, 6) == 6
     assert Rational(36, 6) != 7
     assert 8 != Rational(4, 6)
+
+    try:
+        '4/9' + Rational(5, 9)
+    except TypeError as e:
+        assert str(e) == "unsupported operand type(s) for +: 'Rational' and 'str'"
 
 
 def test_cast_to_float():
@@ -152,17 +147,17 @@ def test_parse_from_string():
     try:
         Rational.from_string("0/0")
     except ValueError as e:
-        assert str(e) == "Denominator is nonpositive in \"0/0\""
+        assert str(e) == "denominator is nonpositive in \"0/0\""
 
     try:
         Rational.from_string("7/-6")
     except ValueError as e:
-        assert str(e) == "Denominator is nonpositive in \"7/-6\""
+        assert str(e) == "denominator is nonpositive in \"7/-6\""
 
     try:
         Rational.from_string("4.0/1")
     except ValueError as e:
-        assert str(e) == "Numerator or denominator is not integer in \"4.0/1\""
+        assert str(e) == "invalid literal for int() with base 10: '4.0'"
 
 
 if __name__ == '__main__':
