@@ -8,8 +8,10 @@ def tenet(input_file_path: str, output_file_path: str) -> None:
         raise ValueError(input_file_path + " is a directory")
     input_file = open(input_file_path, "r")
     output_file = open(output_file_path, "w")
-    for s in input_file.readlines():
+    for s in input_file:
         output_file.write((s.strip('\n'))[::-1] + '\n')
+    input_file.close()
+    output_file.close()
 
 
 if __name__ == '__main__':

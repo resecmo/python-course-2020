@@ -16,8 +16,12 @@ def tenet(input_file_path: str, output_file_path: str = None) -> str:
     else:
         output_file = open(output_file_path, "w")
 
-    for s in input_file.readlines():
+    for s in input_file:
         output_file.write((s.strip('\n'))[::-1] + '\n')
+
+    input_file.close()
+    output_file.close()
+
     return output_file_path
 
 
