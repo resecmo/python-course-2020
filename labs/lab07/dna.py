@@ -1,22 +1,18 @@
-#from abc import ABC
 from random import randint
-
-
-class IdentityMapping:  # auxiliary class to be used as an identity mapping
-    def __getitem__(self, item):
-        return item
-
-    def __contains__(self, item):
-        return True
+from string import ascii_letters
 
 
 class BioSeq:
-    complements = IdentityMapping()  # todo?
+    # any ascii letter is allowed to be used in generalized sequence
+    complements = {x: y for (x, y) in zip(list(ascii_letters), list(ascii_letters))}
 
     def __init__(self, seq: str):
+        if not isinstance(seq, str):
+            raise ValueError("seq must be str")
+
         for ch in seq:
             if ch not in self.complements:
-                raise ValueError("invalid base letter")
+                raise ValueError("invalid base letter: {}".format(ch))
         self.seq = seq
 
     def __add__(self, other):
@@ -26,9 +22,6 @@ class BioSeq:
             return type(other)(self.seq + other.seq)
         else:
             return NotImplemented
-
-    def __radd__(self, other):
-        pass  # todo
 
     def __mul__(self, other):
         if isinstance(other, type(self)):
@@ -57,7 +50,8 @@ class BioSeq:
         if isinstance(self, type(other)) and isinstance(other, type(self)):
             return self.seq == other.seq
         else:
-            return NotImplemented
+            # for unclear reasons, returning NotImplemented doesn't work as expected
+            raise ValueError("can't compare {} with {}".format(type(self), type(other)))
 
     def complementary_seq(self):
         result = ""
@@ -69,10 +63,7 @@ class BioSeq:
 class Rna(BioSeq):
     complements = {'A': 'T', 'U': 'A', 'G': 'C', 'C': 'G'}
 
-    def __init__(self, seq):  # todo: make abstract?
-        for ch in seq:
-            if ch not in self.complements:
-                raise ValueError("invalid base letter")
+    def __init__(self, seq):
         super().__init__(seq)
 
     def complement(self):
@@ -83,9 +74,6 @@ class Dna(BioSeq):
     complements = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
 
     def __init__(self, seq):
-        for ch in seq:
-            if ch not in self.complements:
-                raise ValueError("invalid base letter")
         super().__init__(seq)
 
     def __getitem__(self, item):
@@ -96,18 +84,55 @@ class Dna(BioSeq):
 
 
 def test():
-    seq = BioSeq("ACTTGCTAGC")
-    dna1 = Dna("ACTATAGTAGAAAAAGCA")
+    # construction test
+    try:
+        dna0 = Dna("AGCTGUG")
+    except ValueError as e:
+        assert str(e) == "invalid base letter: U"
+
+    try:
+        rna0 = Rna("CAGUTUGCA")
+    except ValueError as e:
+        assert str(e) == "invalid base letter: T"
+
+    seq = BioSeq("chyq")
+    dna1 = Dna("GACT")
     dna2 = Dna("ACTCG")
-    print(seq, dna1, seq + dna1, dna1 + seq, dna1 + dna2, sep='\n')
-
     rna1 = Rna("UGUAGA")
-    print(dna1 + rna1)
 
-    print(Dna.complements)
+    # __str__ and __add__ test
+    assert str(seq) == "BioSeq: chyq"
+    assert str(dna1) == "Dna: GACT CTGA"
+    assert str(seq + dna1) == "BioSeq: chyqGACT"
+    assert str(dna1 + seq) == "BioSeq: GACTchyq"
+    assert str(dna1 + dna2) == "Dna: GACTACTCG CTGATGAGC"
 
+    try:
+        print(dna1 + rna1)
+    except TypeError as e:
+        assert str(e) == "unsupported operand type(s) for +: 'Dna' and 'Rna'"
+
+    # indexing test
+    assert dna1[3] == ["T", "A"]
+    assert rna1[2] == "U"
+
+    # complement test
+    assert dna1.complementary_seq() == "CTGA"
+    assert rna1.complementary_seq() == "ACATCT"
+
+    #print(Dna.complements)
+
+    # __mul__ test (not really tests anything)
     print(Rna("AAAAAAA") * Rna("ACGUCAGAU"))
+    print(dna1 * dna2)
 
+    # __eq__ test
+    assert Dna("ATCTA") == Dna("ATC") + Dna("TA")
+    assert Rna("UGUAGA") == Rna("UGU") + Rna("AGA")
+    try:
+        Rna("AAA") == Dna("AAA")
+    except ValueError as e:
+        assert str(e) == "can't compare <class '__main__.Rna'> with <class '__main__.Dna'>"
 
 
 if __name__ == "__main__":
