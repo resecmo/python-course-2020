@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
@@ -7,26 +8,31 @@ import requests
 
 
 def search_image(query):
+    # print(query)
 
     url = "https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/Search/ImageSearchAPI"
 
-    querystring = {"pageNumber": "1", "pageSize": "1", "q": query, "autoCorrect": "true"}
+    querystring = {"pageNumber": "1", "pageSize": "1", "q": quote(query), "autoCorrect": "true"}
 
     headers = {
         'x-rapidapi-key': CONFIG["search_api_key"],
         'x-rapidapi-host': "contextualwebsearch-websearch-v1.p.rapidapi.com"
         }
 
+    # print(querystring)
     response = requests.request("GET", url, headers=headers, params=querystring)
 
-    return response.text
+    print(response.text, type(response.text))
+    resp = json.loads(response.text)
+    if resp["totalCount"] == 0:
+        return "No pictures found"
+    else:
+        return resp["value"][0]["url"]
 
 
 CONFIG_FILE = 'botconfig'
 with open(CONFIG_FILE, "r") as file:
     CONFIG = json.load(file)
-
-# PROXY_URL = 'socks5://xxx.xxx.xxx.xxx'  # Вставить здесь подходящий IP
 
 secret_token = CONFIG["token"]
 
