@@ -8,7 +8,7 @@ import requests
 
 
 def search_image(query):
-    # print(query)
+    print(query)
 
     url = "https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/Search/ImageSearchAPI"
 
@@ -19,13 +19,13 @@ def search_image(query):
         'x-rapidapi-host': "contextualwebsearch-websearch-v1.p.rapidapi.com"
         }
 
-    # print(querystring)
+    print(querystring)
     response = requests.request("GET", url, headers=headers, params=querystring)
 
     print(response.text, type(response.text))
     resp = json.loads(response.text)
     if resp["totalCount"] == 0:
-        return "No pictures found"
+        raise ValueError("no pictures found")
     else:
         return resp["value"][0]["url"]
 
@@ -47,7 +47,12 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler()
 async def echo(message: types.Message):
-    await message.reply(search_image(message.text))
+    try:
+        image_url = search_image(message.text)
+        await message.answer_photo(image_url)
+    except ValueError as e:
+        assert str(e) == "no pictures found"
+        await message.answer(str(e))
 
 
 if __name__ == '__main__':
