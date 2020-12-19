@@ -3,21 +3,21 @@ def accepts(*types):
         def wrap(*args):
             if len(args) != len(types):
                 raise RuntimeError()  # todo
-            for (_arg, _type) in zip(args, types):
-                if not (_type is None and _arg is None) and not (_type is not None and isinstance(_arg, _type)):
-                    raise TypeError(f"{_arg} should be of type {_type}, not {type(_arg)}")
+            for (arg_, type_) in zip(args, types):
+                if not (type_ is None and arg_ is None) and not (type_ is not None and isinstance(arg_, type_)):
+                    raise TypeError(f"{arg_} should be of type {type_}, not {type(arg_)}")
             return func(*args)
         return wrap
     return inner
 
 
-def returns(_type):
+def returns(type_):
     def inner(func):
         def wrap(*args):
-            ret = func(*args)
-            if not (_type is None and ret is None) and not (_type is not None and isinstance(ret, _type)):
-                raise TypeError(f"{ret} should be of type {_type}, not {type(ret)}")
-            return ret
+            result = func(*args)
+            if not (type_ is None and result is None) and not (type_ is not None and isinstance(result, type_)):
+                raise TypeError(f"{result} should be of type {type_}, not {type(result)}")
+            return result
         return wrap
     return inner
 
