@@ -30,19 +30,29 @@ def connection():
             del connections[connections.index(conn)]
 
 
-async def write_to_file(file):  # TODO
-    file.write("test")
+def write_to_file(file):  # TODO
+    msg = yield
+    file.write(msg)
 
 
-async def connect_user():  # TODO
-    f = open("aa.txt", "w")
-    await write_to_file(f)
+def connect_user(user_id):  # TODO
+    f = open(f"{user_id}.txt", "w")
+    msg = yield
+    yield from write_to_file(f)
     f.close()
 
 
 def scheduler():  # TODO
+    auth_users = []
+    connections = []
     for i in connection():
         print(i)
+        s = i.split()
+        if i[:4] == "auth":
+            user = int(s[1])
+            auth_users.append(user)
+            connections.append(connect_user(user))
+        elif
 
 
 scheduler()
